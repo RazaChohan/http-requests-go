@@ -29,5 +29,11 @@ go build myhttp.go
 ```
 
 
+#### Running test cases
+
+```bash
+go test --run ''
+
+```
 
 
