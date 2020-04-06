@@ -58,7 +58,10 @@ func TestGetStartAndEndIndexForLastThread(t *testing.T) {
 		t.Error("Expected", "25, 25", "Got", strconv.Itoa(startIndex) + ", " + strconv.Itoa(endIndex))
 	}
 }
-
+// Test send http request
 func TestSendHttpRequest(t *testing.T) {
-	SendHttpRequest()
+	response, _ := SendHttpRequest("http://google.com")
+	if len(response) == 0 {
+		t.Error("Expected", "Non empty response", "Got", "Empty response")
+	}
 }
