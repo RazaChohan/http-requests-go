@@ -3,7 +3,7 @@
 ####  Clone this repository
 
 ```bash
-$ git clone https://github.com/RazaChohan/http-requests-go.git
+git clone https://github.com/RazaChohan/http-requests-go.git
 ```
 
 #### Build
