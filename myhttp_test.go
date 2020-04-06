@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"strconv"
 	"testing"
 )
 
@@ -32,7 +32,6 @@ func TestExistingSchemeToUrl(t *testing.T) {
 func TestGetMd5Hash(t *testing.T) {
 	expectedHash := "774fa93897af7c00741b04ab3094175b"
 	md5hash := GetMd5Hash("my_http_md5_test")
-	fmt.Println(md5hash)
 	if md5hash != expectedHash {
 		t.Error("Expected", expectedHash, "Got", md5hash)
 	}
@@ -44,4 +43,22 @@ func TestTaskPerThread(t *testing.T) {
 	if expectedTasks != tasksPerThread {
 		t.Error("Expected", expectedTasks, "Got", tasksPerThread)
 	}
+}
+//Test get start and end index for
+func TestGetStartAndEndIndexForFourthThread(t *testing.T) {
+	startIndex, endIndex := GetStartAndEndIndexForCurrentThread(5, 4, 25)
+	if startIndex != 20 || endIndex != 25 {
+		t.Error("Expected", "20, 25", "Got", strconv.Itoa(startIndex) + ", " + strconv.Itoa(endIndex))
+	}
+}
+//Test get start and end index for
+func TestGetStartAndEndIndexForLastThread(t *testing.T) {
+	startIndex, endIndex := GetStartAndEndIndexForCurrentThread(5, 5, 25)
+	if startIndex != 25 || endIndex != 25 {
+		t.Error("Expected", "25, 25", "Got", strconv.Itoa(startIndex) + ", " + strconv.Itoa(endIndex))
+	}
+}
+
+func TestSendHttpRequest(t *testing.T) {
+	SendHttpRequest()
 }
