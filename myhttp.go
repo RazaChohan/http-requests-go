@@ -16,19 +16,50 @@ func main() {
 	flag.Parse()
 	//get all urls from flags
 	urls := flag.Args()
-	fmt.Println(*threads)
+	//Calculate urls per threads
+	threadResults := make(chan []string)
+	//Number of urls
+	urlsSize := len(urls)
+	//If no of thread greater than urls update threads to no. of urls
+	if *threads > urlsSize {
+		*threads = urlsSize
+	}
+	//no. of tasks per thread
+	taskPerThread := TaskPerThread(urlsSize, *threads)
+	// Goroutine to send multiple jobs to the channel
+	for i := 0; i < *threads; i++ {
+		//Get start and end indexes of urls
+		startIndexOfUrls, endIndexOfUrls := GetStartAndEndIndexForCurrentThread(taskPerThread, i, urlsSize)
+		go func(num int) {
+			threadResults <- ProcessUrlRequests(urls[startIndexOfUrls:endIndexOfUrls])
+		}(i)
+	}
+
+	// Receive output from the channel to print
+	for i := 0; i < *threads; i++ {
+		for _, stringToPrint := range <-threadResults {
+			fmt.Println(stringToPrint)
+		}
+	}
+}
+// process url requests
+func ProcessUrlRequests(urls []string) []string {
+	var outputsToPrint []string
 	//Loop on urls passed
 	for _, urlString := range urls {
+		//Add scheme to url if not added
 		urlString := AddSchemeToUrl(urlString)
+		//Send get requests
 		responseBody, err  := SendHttpRequest(urlString)
 		var outputToPrint string
-		if err == nil {
-			outputToPrint = urlString + " << RESPONSE HASH >> " + GetMd5Hash(responseBody)
-		} else {
-			outputToPrint = urlString + " << RESPONSE ERROR MSG >> " + err.Error()
+		if err == nil { //If no error get md5 hash of response body
+			outputToPrint = urlString + " " + GetMd5Hash(responseBody)
+		} else { // if error print error in output
+			outputToPrint = urlString + " Error: " + err.Error()
 		}
-		fmt.Println(outputToPrint)
+		outputsToPrint = append(outputsToPrint, outputToPrint)
 	}
+	return outputsToPrint
 }
 //Send http request
 func SendHttpRequest(url string) (string, error) {
@@ -55,4 +86,21 @@ func AddSchemeToUrl(urlStr string) string {
 		urlStr = "http://" + urlStr
  	}
 	return urlStr
+}
+//Tasks per thread
+func TaskPerThread(urlsSize int, allowedThreads int) int {
+	return (urlsSize + allowedThreads - 1) / allowedThreads
+}
+//Start and end range of element for current thread
+func GetStartAndEndIndexForCurrentThread(tasksPerThread int, threadNumber int, totalTasks int) (int, int){
+	startIndex := threadNumber * tasksPerThread
+	endIndex := min(startIndex + tasksPerThread, totalTasks)
+	return startIndex, endIndex
+}
+// Get min of two numbers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
